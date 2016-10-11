@@ -10,11 +10,20 @@ L[oose] object [M]apper - it maps data on objects, failing only gracefully.
 This is useful for consuming 3d-party APIs or building your own
  where you need to report all invalid pieces of data.
 
-### Using it
+ 1. [Install](#installing)
+ 2. [Use](#how-to-use-it)
+ 3. [Extend](#add-new-data-types)
+
+___
+
+### Installing
 
 You can add this library to your project with `composer require foorg/moose`.
 
-The most convenient way of using it is via `AnnotationMetadataProvider`.
+### How to use it
+
+
+The most convenient way of using it is with `AnnotationMetadataProvider`.
 Suppose we have this kind of API format for sending email messages:
 ```json
 {
@@ -101,3 +110,133 @@ There are two independent metadata providers: `AnnotationMetadataProvider` and
  warmed up first. It's natural to use the former in production and the latter in development
  mode, although you could use invalidating provider for both of them as `stat()` syscalls
  are not that expensive.
+
+### Add new data types
+
+If you want to add your own data type, perhaps to replace and extend some of the
+ existing or to add a new one, you can do this pretty easily and here's how.
+
+Let's think about a hypothetical situation where we have a json API and there's an
+ endpoint where in incoming data there's a `ids` field and it is a list of IDs
+ separated with comma, e.g. `ids=1,2,3,4`. As you might guess our existing `ArrayField`
+ type would expect it to be `array` but it is in fact a string.
+
+However, we could create our own type that would handle this case gracefully. Note though
+ that extending `ArrayField` would probably be better in this case but it wouldn't show
+ all the steps of creating a new type.
+
+We'll start from creating our own annotation class:
+
+```php
+use moose\annotation\Field;
+use moose\annotation\exception\InvalidTypeException;
+use function moose\type;
+
+/**
+ * @Annotation
+ * @Target({"PROPERTY", "ANNOTATION"})
+ */
+class CommaArrayField extends Field
+{
+    public $T;
+
+    public $separator;
+
+    public function __construct(array $options)
+    {
+        if (isset($options["value"])) {
+            $options["T"] = $options["value"]; // "value" is always the unnamed first argument of an annotation, if any
+        }
+        if ( ! isset($options["T"]) || ! $options["T"] instanceof Field) {
+            throw new InvalidTypeException(self::class, "T", Field::class, type($options["T"]));
+        }
+        if ( ! isset($options["separator"])) {
+            throw new InvalidTypeException(self::class, "separator", "string", "null");
+        }
+
+        parent::__construct($options);
+    }
+
+    public function getArgs()
+    {
+        return [$this->T, $this->separator]; // this will be placed in $metadata->args
+    }
+
+    public function getTypeName(): string
+    {
+        return "comma_array";
+    }
+}
+```
+
+Now we will need to create the mapper itself, but we call it coercer because Moose not only
+ maps data but also tries to coerce types to the right ones.
+
+```php
+use moose\coercer\TypeCoercer;
+use moose\Context;
+use moose\ConversionResult;
+use moose\error\TypeError;
+use moose\metadata\TypeMetadata;
+use function moose\type;
+
+class CommaArrayCoercer implements TypeCoercer
+{
+    public function coerce($value, TypeMetadata $metadata, Context $ctx): ConversionResult
+    {
+        if ( ! \is_string($value)) {
+            return ConversionResult::error(new TypeError("string", type($value)));
+        }
+        if (\strlen($value) === 0) {
+            return ConversionResult::value([]);
+        }
+
+        $value = explode($metadata->args[1], $value);
+
+        $errors = [];
+        $type = $metadata->args[0]; /** @var TypeMetadata $type */
+        $mapped = [];
+
+        foreach ($value as $idx => $v) {
+            $result = $ctx->coerce($v, $type);
+            if ($result->getErrors()) {
+                $errors[] = $result->errorsAtIdx($idx);
+
+                // if some of our values couldn't be coerced completely, we can't say that this array
+                // is correct so we bail out and return only errors
+                if ($result->getValue() === null) {
+                    return ConversionResult::errors(array_merge(...$errors));
+                }
+            }
+
+            $mapped[] = $result->getValue();
+        }
+
+        $errors = $errors ? array_merge(...$errors) : [];
+
+        return ConversionResult::errors($errors, $mapped);
+    }
+}
+```
+
+And now we need to add this type to the coercers that we pass to the `moose\Mapper`:
+```php
+$coercers = default_coercers() + [
+    // "comma_array" = CommaArrayField::getTypeName()
+    "comma_array" => new CommaArrayField()
+];
+$mapper = new Mapper(new AnnotationMetadataProvider($reader), $coercers);
+```
+
+Here's how this new annotation can be used in classes:
+```php
+class IncrementImpressions
+{
+    /**
+     * @CommaArrayField(@IntField(), separator=",")
+     **/
+    private $ids;
+
+    ...
+}
+```
