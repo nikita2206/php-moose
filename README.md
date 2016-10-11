@@ -70,8 +70,25 @@ $mapper = new Mapper(new AnnotationMetadataProvider($reader), default_coercers()
 $result = $mapper->map(Message::class, $json);
 ```
 
-There are also decorators for MetadataProvider that allow for proper caching of
- metadata but that's [another story](caching-metadata).
+There are also decorators for `MetadataProvider` that allow for proper caching of
+ metadata but that's [another story](#caching-metadata).
+
+This library comes with a number of types already, here's a list of them:
+ * `ArrayField([T: TypeRef])` (if you don't want homogeneous array you can omit the `T` parameter)
+ * `DateField(format)`
+ * `MapField([K: TypeRef, V: TypeRef]|[V: TypeRef])`
+ * `ObjectField(classname: string)`
+ * `BoolField()`
+ * `FloatField()`
+ * `IntField()`
+ * `StringField()`
+
+`TypeRef` stands for another (nested) annotation of `Field` type, e.g.
+ `ArrayField(T=IntField())` (there is no limit on nesting levels)
+ 
+By the way, types that expect only one parameter (that is `ArrayField`,
+ `DateField`, `MapField(V)` and `ObjectField`) can be instantiated like so:
+ `ArrayField(IntField())` (no name needed for the first parameter)
 
 #### Caching metadata
 
