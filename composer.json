@@ -1,5 +1,5 @@
 {
-    "name": "nikita2206/php-moose"
+    "name": "foorg/moose"
   , "description": "Moose - l[oose] object [m]apper. It allows you to map arbitrary data to objects, trying to coerce values to given types and failing gracefully with a list of validation errors. This is useful for consuming or writing APIs where incoming data can be of invalid format or type."
   , "type": "library"
   , "require": {
