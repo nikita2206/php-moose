@@ -57,7 +57,7 @@ class Recipient
     private $email;
 }
 ```
-Here's how the mapping will be done in our case:
+Here's how we can get the object out of json:
 ```php
 use moose\Mapper;
 use moose\metadata\AnnotationMetadataProvider;
