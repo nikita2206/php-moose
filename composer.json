@@ -1,0 +1,21 @@
+{
+    "name": "nikita2206/php-moose"
+  , "description": "Moose - l[oose] object [m]apper. It allows you to map arbitrary data to objects, trying to coerce values to given types and failing gracefully with a list of validation errors. This is useful for consuming or writing APIs where incoming data can be of invalid format or type."
+  , "type": "library"
+  , "require": {
+      "doctrine/annotations": "^1"
+    , "doctrine/cache": "^1"
+    , "doctrine/instantiator": "^1"
+  }
+  , "require-dev": {
+      "php": "^7"
+    , "phpunit/phpunit": "^5"
+  }
+  , "license": "MIT"
+  , "authors": [
+      {"name": "Nikita Nefedov", "email": "inefedor@gmail.com"}
+  ]
+  , "autoload": {
+      "psr-4": {"Moose\\": "src/"}
+  }
+}
