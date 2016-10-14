@@ -1,8 +1,8 @@
 <?php
 
-namespace Moose;
+namespace moose;
 
-use Moose\Error\Error;
+use moose\error\Error;
 
 class ConversionResult
 {

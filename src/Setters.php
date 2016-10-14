@@ -1,6 +1,6 @@
 <?php
 
-namespace Moose;
+namespace moose;
 
 class Setters
 {

@@ -1,12 +1,12 @@
 <?php
 
-namespace Moose;
+namespace moose;
 
 use Doctrine\Instantiator\InstantiatorInterface;
-use Moose\Coercer\TypeCoercer;
-use Moose\Error\MissingFieldError;
-use Moose\Metadata\MetadataProvider;
-use Moose\Metadata\TypeMetadata;
+use moose\coercer\TypeCoercer;
+use moose\error\MissingFieldError;
+use moose\metadata\MetadataProvider;
+use moose\metadata\TypeMetadata;
 
 class Context
 {

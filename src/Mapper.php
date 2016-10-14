@@ -1,10 +1,10 @@
 <?php
 
-namespace Moose;
+namespace moose;
 
 use Doctrine\Instantiator\Instantiator;
 use Doctrine\Instantiator\InstantiatorInterface;
-use Moose\Metadata\MetadataProvider;
+use moose\metadata\MetadataProvider;
 
 class Mapper
 {
