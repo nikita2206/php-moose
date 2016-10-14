@@ -30,7 +30,7 @@ function render_errors(array $errors): array
     foreach ($errors as $error) {
         if ($error instanceof e\CoercingError) {
             $value = $error->getValue();
-            $value = \is_string($value) || \is_numeric($value) ? $value : \gettype($value);
+            $value = \is_string($value) || \is_numeric($value) ? $value : type($value);
             $rendered[] = "CoercingError in field {$error->getField()}: expected {$error->getExpected()}, got {$value}";
         } elseif ($error instanceof e\InvalidDateFormatError) {
             $rendered[] = "InvalidDateFormatError in field {$error->getField()}: expected format {$error->getExpectedFormat()}, got {$error->getValue()}";
@@ -44,4 +44,21 @@ function render_errors(array $errors): array
     }
 
     return $rendered;
+}
+
+function type($value): string
+{
+    static $map = [
+        "boolean" => "bool",
+        "integer" => "int",
+        "double" => "float",
+        "string" => "string",
+        "array" => "array",
+        "object" => "object",
+        "resource" => "resource",
+        "NULL" => "null",
+        "unknown type" => "unknown type"
+    ];
+
+    return $map[\gettype($value)];
 }

@@ -13,8 +13,6 @@ class AnnotationMetadataProvider implements MetadataProvider
 
     /**
      * @var Reader
-     * @DateTime("Y-m-d")
-     * @Array(T=@Array(T=@Array(T=@Array(@Map(K=@Int, V=@String)))))
      */
     private $reader;
 
@@ -54,6 +52,7 @@ class AnnotationMetadataProvider implements MetadataProvider
                     $md->optional = $type->optional ?? false;
                     $md->type = $this->typeMetadataFromAnnotation($type);
                 }
+                $type = null;
             }
         } while ($refl = $refl->getParentClass());
 

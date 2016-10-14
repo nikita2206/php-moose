@@ -3,6 +3,7 @@
 namespace moose\annotation;
 
 use moose\annotation\exception\InvalidTypeException;
+use function moose\type;
 
 /**
  * @Annotation
@@ -21,7 +22,7 @@ class ObjectField extends Field
             $options["classname"] = $options["value"];
         }
         if ( ! isset($options["classname"]) || ! class_exists($options["classname"])) {
-            throw new InvalidTypeException(self::class, "classname", "classname", \gettype($options["classname"]));
+            throw new InvalidTypeException(self::class, "classname", "classname", type($options["classname"]));
         }
 
         parent::__construct($options);

@@ -1,6 +1,6 @@
 <?php
 
-namespace tests\integration;
+namespace moose\tests\functional;
 
 use Doctrine\Common\Annotations\AnnotationReader;
 use moose\annotation as ann;
@@ -23,9 +23,39 @@ class AnnotationMapperTest extends TestCase
         $e1->untypedMap = ["foo" => "bar", "bar" => 1, 1 => "foo"];
         $e1->string = "foo";
 
+        $e2 = new NestedStruct();
+        $e2->foo = "bar";
+        $e2->simpleStruct = $e1;
+
+        $e3 = new RecursiveStruct();
+        $e3->bar = "foo";
+        $e3->childs = (function () {
+            $e1 = new RecursiveStruct();
+            $e1->childs = [];
+
+            $e2 = new RecursiveStruct();
+            $e2->childs = (function () {
+                $e1 = new RecursiveStruct();
+                $e1->bar = "bar";
+                $e1->childs = [];
+
+                return [$e1];
+            })();
+
+            return [$e1, $e2];
+        })();
+
+        $o1 = ["array" => $e1->untypedArray, "bool" => "y", "date" => $e1->date->format("Y-m-d H:i:s"), "float" => "1.5", "int" => "99", "map" => $e1->untypedMap, "string" => "foo"];
+        $o2 = ["foo" => "bar", "simpleStruct" => $o1];
+        $o3 = ["bar" => "foo", "childs" => [
+            ["childs" => []]
+          , ["childs" => [["bar" => "bar", "childs" => []]]]
+        ]];
+
         return [
-            [SimpleFlatStruct::class, $e1, ["array" => $e1->untypedArray, "bool" => "y", "date" => $e1->date->format("Y-m-d H:i:s"), "float" => "1.5", "int" => "99", "map" => $e1->untypedMap, "string" => "foo"]]
-          , 
+            [SimpleFlatStruct::class     , $e1 , $o1 ]
+          , [NestedStruct::class         , $e2 , $o2 ]
+          , [RecursiveStruct::class      , $e3 , $o3 ]
         ];
     }
 
@@ -49,7 +79,7 @@ class AnnotationMapperTest extends TestCase
 
 class SimpleFlatStruct {
     /**
-     * @ann\ArrayField(origin="int", optional=true)
+     * @ann\ArrayField(origin="array", optional=true)
      */
     public $untypedArray;
     /**
@@ -76,4 +106,26 @@ class SimpleFlatStruct {
      * @ann\StringField(optional=true)
      */
     public $string;
+}
+
+class NestedStruct {
+    /**
+     * @ann\StringField()
+     */
+    public $foo;
+    /**
+     * @ann\ObjectField("moose\tests\functional\SimpleFlatStruct")
+     */
+    public $simpleStruct;
+}
+
+class RecursiveStruct {
+    /**
+     * @ann\StringField(optional=true)
+     */
+    public $bar;
+    /**
+     * @ann\ArrayField(@ann\ObjectField("moose\tests\functional\RecursiveStruct"))
+     */
+    public $childs;
 }

@@ -16,7 +16,7 @@
       {"name": "Nikita Nefedov", "email": "inefedor@gmail.com"}
   ]
   , "autoload": {
-      "psr-4": {"moose\\": "src/"}
+      "psr-4": {"moose\\": "src/", "moose\\tests\\": "tests/"}
     , "files": ["src/functions.php"]
   }
 }

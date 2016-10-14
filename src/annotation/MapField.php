@@ -3,6 +3,7 @@
 namespace moose\annotation;
 
 use moose\annotation\exception\InvalidTypeException;
+use function moose\type;
 
 /**
  * @Annotation
@@ -26,10 +27,10 @@ class MapField extends Field
             $options["V"] = $options["value"];
         }
         if (isset($options["K"]) && ! $options["K"] instanceof Field) {
-            throw new InvalidTypeException(self::class, "K", Field::class, \gettype($options["K"]));
+            throw new InvalidTypeException(self::class, "K", Field::class, type($options["K"]));
         }
         if (isset($options["V"]) && ! $options["V"] instanceof Field) {
-            throw new InvalidTypeException(self::class, "V", Field::class, \gettype($options["V"]));
+            throw new InvalidTypeException(self::class, "V", Field::class, type($options["V"]));
         }
         if (isset($options["K"]) && ! isset($options["V"])) {
             throw new InvalidTypeException(self::class, "V", Field::class, "none");

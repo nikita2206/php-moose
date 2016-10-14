@@ -3,6 +3,7 @@
 namespace moose\annotation;
 
 use moose\annotation\exception\InvalidTypeException;
+use function moose\type;
 
 /**
  * @Annotation
@@ -21,7 +22,7 @@ class ArrayField extends Field
             $options["T"] = $options["value"];
         }
         if (isset($options["T"]) && ! $options["T"] instanceof Field) {
-            throw new InvalidTypeException(self::class, "T", Field::class, \gettype($options["T"]));
+            throw new InvalidTypeException(self::class, "T", Field::class, type($options["T"]));
         }
 
         parent::__construct($options);

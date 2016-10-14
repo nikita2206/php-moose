@@ -6,11 +6,12 @@ use moose\Context;
 use moose\ConversionResult;
 use moose\error\TypeError;
 use moose\metadata\TypeMetadata;
+use function moose\type;
 
 class BoolCoercer implements TypeCoercer
 {
-    private $false = ["no", "false", "N", "F"];
-    private $true = ["yes", "true", "Y", "T"];
+    private $false = ["no", "false", "n", "F"];
+    private $true = ["yes", "true", "y", "T"];
 
     public function __construct($true = null, $false = null)
     {
@@ -21,11 +22,11 @@ class BoolCoercer implements TypeCoercer
     public function coerce($value, TypeMetadata $metadata, Context $ctx): ConversionResult
     {
         if ( ! \is_bool($value) && ! \is_int($value) && ! \is_string($value) && ! \is_float($value)) {
-            return ConversionResult::error(new TypeError("bool", \gettype($value)));
+            return ConversionResult::error(new TypeError("bool", type($value)));
         }
 
         if (\is_string($value)) {
-            $value = trim($value);
+            $value = strtolower(trim($value));
 
             if (\is_numeric($value)) {
                 $value = (bool)(int)$value;

@@ -5,6 +5,7 @@ namespace moose;
 use Doctrine\Instantiator\InstantiatorInterface;
 use moose\coercer\TypeCoercer;
 use moose\error\MissingFieldError;
+use moose\exception\CoercerNotDefinedException;
 use moose\metadata\MetadataProvider;
 use moose\metadata\TypeMetadata;
 
@@ -41,7 +42,7 @@ class Context
     public function coerce($value, TypeMetadata $metadata): ConversionResult
     {
         if ( ! isset($this->coercers[$metadata->type])) {
-            throw new \RuntimeException("Coercer for type {$metadata->type} couldn't be found");
+            throw new CoercerNotDefinedException($metadata->type);
         }
 
         return $this->coercers[$metadata->type]->coerce($value, $metadata, $this);
@@ -67,7 +68,7 @@ class Context
                 if ($result->getErrors()) {
                     $errors[] = $result->errorsInField($propertyMd->origin);
                 }
-                if (!($result->getErrors() && $result->getValue() === null)) {
+                if ( ! ($result->getErrors() && $result->getValue() === null)) {
                     $setter = $this->setters->setter($propertyMd->classname);
                     $setter($instance, $propertyMd->field, $result->getValue());
                 }
