@@ -29,7 +29,7 @@ class ArrayField extends Field
 
     public function getArgs()
     {
-        return [$this->T];
+        return $this->T ? [$this->T] : null;
     }
 
     public function getTypeName(): string

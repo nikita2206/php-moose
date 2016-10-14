@@ -1,6 +1,7 @@
 <?php
 
 namespace moose\annotation;
+
 use moose\annotation\exception\InvalidTypeException;
 
 /**

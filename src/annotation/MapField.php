@@ -1,6 +1,7 @@
 <?php
 
 namespace moose\annotation;
+
 use moose\annotation\exception\InvalidTypeException;
 
 /**
@@ -30,13 +31,16 @@ class MapField extends Field
         if (isset($options["V"]) && ! $options["V"] instanceof Field) {
             throw new InvalidTypeException(self::class, "V", Field::class, \gettype($options["V"]));
         }
+        if (isset($options["K"]) && ! isset($options["V"])) {
+            throw new InvalidTypeException(self::class, "V", Field::class, "none");
+        }
 
         parent::__construct($options);
     }
 
     public function getArgs()
     {
-        return $this->K ? [$this->K, $this->V] : [$this->V];
+        return $this->K ? [$this->K, $this->V] : ($this->V ? [$this->V] : null);
     }
 
     public function getTypeName(): string
