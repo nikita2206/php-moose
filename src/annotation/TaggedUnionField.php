@@ -19,7 +19,7 @@ class TaggedUnionField extends Field
     /**
      * @var string
      */
-    public $tagField;
+    public $tag;
 
     public function __construct(array $options)
     {
@@ -49,7 +49,7 @@ class TaggedUnionField extends Field
 
     public function getArgs()
     {
-        return [$this->tagField, $this->map];
+        return [$this->tag, $this->map];
     }
 
     public function getTypeName(): string

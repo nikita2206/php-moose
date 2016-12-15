@@ -23,9 +23,17 @@ class AnnotationMapperTest extends TestCase
         $e1->untypedMap = ["foo" => "bar", "bar" => 1, 1 => "foo"];
         $e1->string = "foo";
 
+        $o1 = ["array" => $e1->untypedArray, "bool" => "y", "date" => $e1->date->format("Y-m-d H:i:s"), "float" => "1.5", "int" => "99", "map" => $e1->untypedMap, "string" => "foo"];
+
+        yield [SimpleFlatStruct::class, $e1, $o1];
+
         $e2 = new NestedStruct();
         $e2->foo = "bar";
         $e2->simpleStruct = $e1;
+
+        $o2 = ["foo" => "bar", "simpleStruct" => $o1];
+
+        yield [NestedStruct::class, $e2, $o2];
 
         $e3 = new RecursiveStruct();
         $e3->bar = "foo";
@@ -45,18 +53,46 @@ class AnnotationMapperTest extends TestCase
             return [$e1, $e2];
         })();
 
-        $o1 = ["array" => $e1->untypedArray, "bool" => "y", "date" => $e1->date->format("Y-m-d H:i:s"), "float" => "1.5", "int" => "99", "map" => $e1->untypedMap, "string" => "foo"];
-        $o2 = ["foo" => "bar", "simpleStruct" => $o1];
         $o3 = ["bar" => "foo", "childs" => [
             ["childs" => []]
           , ["childs" => [["bar" => "bar", "childs" => []]]]
         ]];
 
-        return [
-            [SimpleFlatStruct::class     , $e1 , $o1 ]
-          , [NestedStruct::class         , $e2 , $o2 ]
-          , [RecursiveStruct::class      , $e3 , $o3 ]
+        yield [RecursiveStruct::class, $e3, $o3];
+
+        $e4 = new ClassWithUnion();
+        $e4->unions = [
+            (function () {
+                $r = new RecursiveStruct();
+                $r->childs = [];
+                $r->childs[] = (function () {
+                    $r = new RecursiveStruct();
+                    $r->childs = [];
+                    $r->bar = "foo";
+
+                    return $r;
+                })();
+
+                return $r;
+            })(),
+            (function () {
+                $n = new NestedStruct();
+                $n->foo = "bar";
+                $n->simpleStruct = new SimpleFlatStruct();
+                $n->simpleStruct->int = 999;
+
+                return $n;
+            })(),
+            ["tag" => "arbitrary", "can" => "have", "any" => "keys", "and" => "values"]
         ];
+
+        $o4 = ["unions" => [
+            ["tag" => "recursive", "childs" => [["childs" => [], "bar" => "foo"]]],
+            ["tag" => "nested", "foo" => "bar", "simpleStruct" => ["int" => 999]],
+            ["tag" => "arbitrary", "can" => "have", "any" => "keys", "and" => "values"]
+        ]];
+
+        yield [ClassWithUnion::class, $e4, $o4];
     }
 
     /**
@@ -128,4 +164,15 @@ class RecursiveStruct {
      * @ann\ArrayField(@ann\ObjectField("moose\tests\functional\RecursiveStruct"))
      */
     public $childs;
+}
+
+class ClassWithUnion {
+    /**
+     * @ann\ArrayField(@ann\TaggedUnionField("tag", map={
+     *   "nested" = @ann\ObjectField("moose\tests\functional\NestedStruct"),
+     *   "recursive" = @ann\ObjectField("moose\tests\functional\RecursiveStruct"),
+     *   "arbitrary" = @ann\MapField()
+     * }))
+     */
+    public $unions;
 }
