@@ -7,7 +7,7 @@ class TypeError extends Error
     private $expected;
     private $actual;
 
-    public function __construct(string $expected, string $actual, $field = null)
+    public function __construct(string $expected, string $actual, string $field = null)
     {
         parent::__construct($field);
 

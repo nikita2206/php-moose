@@ -15,7 +15,8 @@ function default_coercers(): array
         "int"    => new co\IntCoercer(),
         "map"    => new co\MapCoercer(),
         "object" => new co\ObjectCoercer(),
-        "string" => new co\StringCoercer()
+        "string" => new co\StringCoercer(),
+        "tagged_union" => new co\TaggedUnionCoercer(),
     ];
 }
 

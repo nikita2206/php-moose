@@ -64,9 +64,22 @@ class AnnotationMetadataProvider implements MetadataProvider
         $type = new TypeMetadata();
         $type->type = $annot->getTypeName();
         $type->args = $annot->getArgs() ? array_map(function ($arg) {
-            return $arg instanceof Field ? $this->typeMetadataFromAnnotation($arg) : $arg;
+            return $this->parseArgMetadata($arg);
         }, $annot->getArgs()) : null;
 
         return $type;
+    }
+
+    private function parseArgMetadata($arg)
+    {
+        if ($arg instanceof Field) {
+            return $this->typeMetadataFromAnnotation($arg);
+        } elseif (\is_array($arg)) {
+            return array_map(function ($each) {
+                return $this->parseArgMetadata($each);
+            }, $arg);
+        }
+
+        return $arg;
     }
 }

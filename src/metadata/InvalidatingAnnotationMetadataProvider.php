@@ -24,22 +24,16 @@ class InvalidatingAnnotationMetadataProvider implements MetadataProvider
      */
     private $checked;
 
-    /**
-     * @var bool
-     */
-    private $checkIndefinitely;
-
-    public function __construct(MetadataProvider $realProvider, CacheMetadataProvider $cacheProvider, bool $checkIndefinitely = false)
+    public function __construct(MetadataProvider $realProvider, CacheMetadataProvider $cacheProvider)
     {
         $this->realProvider = $realProvider;
         $this->cacheProvider = $cacheProvider;
-        $this->checkIndefinitely = false;
         $this->checked = [];
     }
 
     public function for(string $classname): array
     {
-        if ($this->checkIndefinitely || ! isset($this->checked[$classname])) {
+        if ( ! isset($this->checked[$classname])) {
             $cachedAt = $this->cacheProvider->wasCachedAt($classname);
 
             if ($cachedAt === null) {

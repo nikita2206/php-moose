@@ -5,7 +5,7 @@ namespace moose\metadata;
 use moose\metadata\exception\CacheMissException;
 
 /**
- * It is different from CacheInvalidatingAnnotationMetadataProvider in that it will try to fetch data from cache
+ * It is different from InvalidatingAnnotationMetadataProvider in that it will try to fetch data from cache
  * regardless of the last change of the file, and only if cache doesn't have the required entry it will regenerate it.
  * Because it doesn't need to know the source of the metadata (it can be annotations or xml config f.e.) it will work
  * with any pair of metadata providers

@@ -22,7 +22,7 @@ class ObjectField extends Field
             $options["classname"] = $options["value"];
         }
         if ( ! isset($options["classname"]) || ! class_exists($options["classname"])) {
-            throw new InvalidTypeException(self::class, "classname", "classname", type($options["classname"]));
+            throw new InvalidTypeException(self::class, "classname", "classname", type($options["classname"] ?? null));
         }
 
         parent::__construct($options);
