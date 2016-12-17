@@ -82,7 +82,7 @@ $result = $mapper->map(Message::class, $json);
 There are also decorators for `MetadataProvider` that allow for proper caching of
  metadata but that's [another story](#caching-metadata).
 
-This library comes with a number of types already, here's a list of them:
+This library comes with a number of predefined types, here's a list of them:
  * `ArrayField([T: TypeRef])` (if you don't want homogeneous array you can omit the `T` parameter)
  * `DateField(format)`
  * `MapField([K: TypeRef, V: TypeRef]|[V: TypeRef])`
@@ -91,6 +91,7 @@ This library comes with a number of types already, here's a list of them:
  * `FloatField()`
  * `IntField()`
  * `StringField()`
+ * `TaggedUnionField(tag: string, map: { tag: string => typeOrClassname: string|TypeRef })`
 
 `TypeRef` stands for another (nested) annotation of `Field` type, e.g.
  `ArrayField(T=IntField())` (there is no limit on nesting levels)
@@ -98,6 +99,42 @@ This library comes with a number of types already, here's a list of them:
 By the way, types that expect only one parameter (that is `ArrayField`,
  `DateField`, `MapField(V)` and `ObjectField`) can be instantiated like so:
  `ArrayField(IntField())` (no name needed for the first parameter)
+
+`TaggedUnion` allows you to have a field that can contain any of the
+ listed types. Here's how to make it work:
+```php
+class Event
+{
+    /**
+     * @StringField()
+     **/
+    public $name;
+
+    /**
+     * @TaggedUnionField("type", {
+     *   "payment" => "PaymentObject",
+     *   "withdrawal" => "WithdrawalObject",
+     *   "unknown" => MapField()
+     * })
+     **/
+    public $payload;
+}
+```
+
+This configuration will be able map data of the form:
+```
+{
+  "name": "any name",
+  "payload": {"type": "payment", "payment": "object", "fields": "etc"}
+}
+
+or
+
+{
+  "name": "any name",
+  "payload": {"type": "unknown", "anything": "can", "go": "here"}
+}
+```
 
 #### Caching metadata
 
