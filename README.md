@@ -111,10 +111,10 @@ class Event
     public $name;
 
     /**
-     * @TaggedUnionField("type", {
-     *   "payment" => "PaymentObject",
-     *   "withdrawal" => "WithdrawalObject",
-     *   "unknown" => MapField()
+     * @TaggedUnionField("type", "map" = {
+     *   "payment" = "PaymentObject",
+     *   "withdrawal" = "WithdrawalObject",
+     *   "unknown" = MapField()
      * })
      **/
     public $payload;
