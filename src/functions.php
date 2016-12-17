@@ -21,6 +21,9 @@ function default_coercers(): array
 }
 
 /**
+ * This function is used for rendering errors in tests, it also represents an example of
+ * how you could render errors for your kind of representation layer
+ *
  * @param e\Error[] $errors
  * @return string[]
  */
@@ -39,6 +42,9 @@ function render_errors(array $errors): array
             $rendered[] = "MissingFieldError for field {$error->getField()}";
         } elseif ($error instanceof e\TypeError) {
             $rendered[] = "TypeError in field {$error->getField()}: expected {$error->getExpected()}, got {$error->getActual()}";
+        } elseif ($error instanceof e\InvalidTagError) {
+            $expected = implode(", ", $error->getExpected());
+            $rendered[] = "InvalidTagError in field {$error->getField()}: expected one of: {$expected}, got {$error->getTag()}";
         } else {
             throw new \RuntimeException("There is no renderer for " . \get_class($error));
         }
@@ -47,6 +53,13 @@ function render_errors(array $errors): array
     return $rendered;
 }
 
+/**
+ * PHP is inconsistent with its type names. This function returns the most popular names for data types
+ * instead of those that gettype() usually returns.
+ *
+ * @param $value
+ * @return string
+ */
 function type($value): string
 {
     static $map = [
